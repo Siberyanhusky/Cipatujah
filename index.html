@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cuaca Nelayan Cipatujah</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --aman: #1a7a4a;
+  --aman-bg: #e8f5ee;
+  --aman-mid: #2da860;
+  --waspada: #c47a00;
+  --waspada-bg: #fff8e6;
+  --waspada-mid: #f0a500;
+  --bahaya: #c0392b;
+  --bahaya-bg: #fdecea;
+  --bahaya-mid: #e74c3c;
+  --ocean: #0a3d6b;
+  --sand: #f5f0e8;
+  --text: #1a1a2e;
+  --muted: #6b7a8d;
+  --card: #ffffff;
+  --radius: 16px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--sand);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 40px;
+}
+
+/* HEADER */
+.header {
+  background: var(--ocean);
+  color: white;
+  padding: 24px 20px 20px;
+  position: relative;
+  overflow: hidden;
+}
+.header::before {
+  content: '';
+  position: absolute;
+  bottom: -30px; left: -20px;
+  width: 120%; height: 60px;
+  background: var(--sand);
+  border-radius: 50% 50% 0 0;
+}
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 1;
+}
+.loc-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.loc-sub {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-top: 2px;
+}
+.refresh-btn {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: white;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.2s;
+}
+.refresh-btn:active { background: rgba(255,255,255,0.25); }
+.header-time {
+  font-size: 12px;
+  opacity: 0.6;
+  margin-top: 4px;
+  position: relative;
+  z-index: 1;
+}
+
+/* STATUS CARD */
+.main { padding: 0 16px; margin-top: 24px; }
+
+.status-card {
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s ease;
+}
+.status-card::after {
+  content: '';
+  position: absolute;
+  right: -20px; top: -20px;
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  opacity: 0.1;
+  transition: all 0.4s;
+}
+.status-card.aman { background: var(--aman-bg); border: 1.5px solid var(--aman); }
+.status-card.aman::after { background: var(--aman); }
+.status-card.waspada { background: var(--waspada-bg); border: 1.5px solid var(--waspada); }
+.status-card.waspada::after { background: var(--waspada); }
+.status-card.bahaya { background: var(--bahaya-bg); border: 1.5px solid var(--bahaya); }
+.status-card.bahaya::after { background: var(--bahaya); }
+
+.status-emoji { font-size: 36px; margin-bottom: 8px; display: block; }
+.status-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.status-card.aman .status-label { color: var(--aman); }
+.status-card.waspada .status-label { color: var(--waspada); }
+.status-card.bahaya .status-label { color: var(--bahaya); }
+
+.status-desc {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+  opacity: 0.8;
+}
+
+/* METRICS */
+.metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.metric-card {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 14px 12px;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.metric-icon { font-size: 20px; margin-bottom: 6px; display: block; }
+.metric-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ocean);
+  line-height: 1;
+}
+.metric-unit { font-size: 10px; font-weight: 400; color: var(--muted); }
+.metric-label { font-size: 10px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+
+/* WAVE CANVAS */
+.wave-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.wave-card-title {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+#waveCanvas { width: 100%; height: 70px; display: block; border-radius: 8px; }
+
+/* FORECAST */
+.section-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.forecast-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin-bottom: 16px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.forecast-scroll::-webkit-scrollbar { display: none; }
+.fcard {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 12px 14px;
+  min-width: 76px;
+  text-align: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border: 1.5px solid transparent;
+  transition: border-color 0.2s;
+}
+.fcard.aman { border-color: #b8e0c8; }
+.fcard.waspada { border-color: #ffd980; }
+.fcard.bahaya { border-color: #f5b3ae; }
+.fcard-time { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+.fcard-emoji { font-size: 22px; margin-bottom: 4px; display: block; }
+.fcard-wave {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ocean);
+}
+.fcard-wind { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+/* TIPS */
+.tips-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.tip-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.tip-item:last-child { border-bottom: none; padding-bottom: 0; }
+.tip-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+/* FOOTER */
+.footer {
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted);
+  padding: 0 20px;
+  line-height: 1.8;
+}
+.footer a { color: var(--ocean); text-decoration: none; }
+
+/* LOADING */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--ocean);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  transition: opacity 0.5s;
+  color: white;
+}
+.loading-overlay.hidden { opacity: 0; pointer-events: none; }
+.loading-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+.loading-sub { font-size: 13px; opacity: 0.7; margin-bottom: 24px; }
+.loader {
+  width: 40px; height: 40px;
+  border: 3px solid rgba(255,255,255,0.2);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ERROR */
+.error-card {
+  background: #fdecea;
+  border: 1.5px solid #e74c3c;
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: #c0392b;
+  display: none;
+}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-title">🌊 Cuaca Nelayan</div>
+  <div class="loading-sub">Memuat data BMKG Cipatujah...</div>
+  <div class="loader"></div>
+</div>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="loc-name">🌊 Cipatujah</div>
+      <div class="loc-sub">Pantai Selatan · Kab. Tasikmalaya</div>
+    </div>
+    <button class="refresh-btn" onclick="loadData()">
+      ↺ Perbarui
+    </button>
+  </div>
+  <div class="header-time" id="headerTime">Memuat...</div>
+</div>
+
+<div class="main">
+  <div class="error-card" id="errorCard">
+    ⚠️ Gagal memuat data cuaca. Periksa koneksi internet dan coba lagi.
+  </div>
+
+  <div class="status-card aman" id="statusCard">
+    <span class="status-emoji" id="statusEmoji">⛵</span>
+    <div class="status-label" id="statusLabel">Memuat...</div>
+    <div class="status-desc" id="statusDesc">Mengambil data terkini dari Open-Meteo...</div>
+  </div>
+
+  <div class="metrics">
+    <div class="metric-card">
+      <span class="metric-icon">🌊</span>
+      <div class="metric-val" id="mGelombang">-</div>
+      <div class="metric-label">Tinggi gelombang</div>
+    </div>
+    <div class="metric-card">
+      <span class="metric-icon">💨</span>
+      <div class="metric-val" id="mAngin">-</div>
+      <div class="metric-label">Kecepatan angin</div>
+    </div>
+    <div class="metric-card">
+      <span class="metric-icon">👁️</span>
+      <div class="metric-val" id="mVis">-</div>
+      <div class="metric-label">Jarak pandang</div>
+    </div>
+  </div>
+
+  <div class="wave-card">
+    <div class="wave-card-title">Animasi gelombang saat ini</div>
+    <canvas id="waveCanvas" height="70"></canvas>
+  </div>
+
+  <div class="section-title">Prakiraan 12 jam ke depan</div>
+  <div class="forecast-scroll" id="forecastRow">
+    <div class="fcard"><div class="fcard-time">--</div><span class="fcard-emoji">⏳</span><div class="fcard-wave">-</div></div>
+  </div>
+
+  <div class="tips-card">
+    <div class="section-title" style="margin-bottom:8px">💡 Saran nelayan</div>
+    <div id="tipsList">
+      <div class="tip-item"><div class="tip-dot" style="background:#ccc"></div><span>Memuat saran...</span></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Sumber: <a href="https://open-meteo.com" target="_blank">Open-Meteo API</a> (data satelit & model cuaca global)<br>
+    Koordinat: -7.73°S, 108.14°E · Diperbarui tiap muat halaman<br>
+    Dibuat oleh <strong>R. Beryan Syabanna</strong> untuk nelayan Cipatujah 🎣
+  </div>
+</div>
+
+<script>
+const LAT = -7.73;
+const LON = 108.14;
+let waveAnimId = null;
+
+async function loadData() {
+  document.getElementById('loadingOverlay').classList.remove('hidden');
+  document.getElementById('errorCard').style.display = 'none';
+
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast`
+      + `?latitude=${LAT}&longitude=${LON}`
+      + `&hourly=wave_height,wind_speed_10m,visibility,weather_code`
+      + `&wind_speed_unit=kmh`
+      + `&timezone=Asia%2FJakarta`
+      + `&forecast_days=2`;
+
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+
+    processData(data);
+  } catch(e) {
+    document.getElementById('errorCard').style.display = 'block';
+    console.error(e);
+    document.getElementById('loadingOverlay').classList.add('hidden');
+  }
+}
+
+function processData(data) {
+  const times = data.hourly.time;
+  const waves = data.hourly.wave_height;
+  const winds = data.hourly.wind_speed_10m;
+  const vis   = data.hourly.visibility;
+  const codes = data.hourly.weather_code;
+
+  const now = new Date();
+  const jakartaStr = now.toLocaleString('sv-SE', {timeZone:'Asia/Jakarta'}).replace(' ','T');
+  const jakartaNow = new Date(jakartaStr);
+
+  let currentIdx = 0;
+  for (let i = 0; i < times.length; i++) {
+    if (new Date(times[i]) <= jakartaNow) currentIdx = i;
+    else break;
+  }
+
+  const curWave = waves[currentIdx] ?? 0;
+  const curWind = winds[currentIdx] ?? 0;
+  const curVis  = vis[currentIdx] != null ? (vis[currentIdx]/1000).toFixed(1) : '-';
+
+  // Update metrics
+  document.getElementById('mGelombang').innerHTML = curWave.toFixed(1) + '<span class="metric-unit"> m</span>';
+  document.getElementById('mAngin').innerHTML = Math.round(curWind) + '<span class="metric-unit"> km/j</span>';
+  document.getElementById('mVis').innerHTML = curVis + '<span class="metric-unit"> km</span>';
+
+  // Status logic
+  const { level, emoji, label, desc, tips } = getStatus(curWave, curWind);
+  const card = document.getElementById('statusCard');
+  card.className = 'status-card ' + level;
+  document.getElementById('statusEmoji').textContent = emoji;
+  document.getElementById('statusLabel').textContent = label;
+  document.getElementById('statusDesc').textContent = desc;
+
+  // Tips
+  document.getElementById('tipsList').innerHTML = tips.map(t =>
+    `<div class="tip-item"><div class="tip-dot" style="background:${t.color}"></div><span>${t.text}</span></div>`
+  ).join('');
+
+  // Forecast (next 12 hours)
+  const forecastStart = currentIdx + 1;
+  const forecastEnd = Math.min(forecastStart + 12, times.length);
+  let fcHTML = '';
+  for (let i = forecastStart; i < forecastEnd; i += 2) {
+    const t = new Date(times[i]);
+    const jam = t.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit', timeZone:'Asia/Jakarta'});
+    const w = waves[i] ?? 0;
+    const wi = winds[i] ?? 0;
+    const { level: fl, emoji: fe } = getStatus(w, wi);
+    fcHTML += `<div class="fcard ${fl}">
+      <div class="fcard-time">${jam}</div>
+      <span class="fcard-emoji">${fe}</span>
+      <div class="fcard-wave">${w.toFixed(1)}m</div>
+      <div class="fcard-wind">${Math.round(wi)} km/j</div>
+    </div>`;
+  }
+  document.getElementById('forecastRow').innerHTML = fcHTML;
+
+  // Wave animation
+  const waveSlice = waves.slice(currentIdx, currentIdx + 20).filter(v => v != null);
+  drawWave(waveSlice.length > 0 ? waveSlice : [0.5], level);
+
+  // Time display
+  const opts = {weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit',timeZone:'Asia/Jakarta'};
+  document.getElementById('headerTime').textContent =
+    'Data: ' + now.toLocaleDateString('id-ID', opts);
+
+  document.getElementById('loadingOverlay').classList.add('hidden');
+}
+
+function getStatus(wave, wind) {
+  if (wave >= 2.5 || wind >= 55) return {
+    level: 'bahaya',
+    emoji: '🚫',
+    label: 'JANGAN MELAUT!',
+    desc: 'Kondisi sangat berbahaya. Gelombang ekstrem dan angin kencang. Semua nelayan WAJIB di darat. Amankan perahu sekarang.',
+    tips: [
+      { color: '#e74c3c', text: 'DILARANG KERAS melaut. Peringatan cuaca ekstrem aktif.' },
+      { color: '#e74c3c', text: 'Segera amankan perahu dan alat tangkap ke daratan yang lebih tinggi.' },
+      { color: '#e74c3c', text: 'Pantau terus grup WA cuaca untuk update terkini.' },
+      { color: '#e74c3c', text: 'Hubungi BASARNAS 115 jika ada nelayan yang belum kembali.' },
+    ]
+  };
+  if (wave >= 1.5 || wind >= 35) return {
+    level: 'waspada',
+    emoji: '⚠️',
+    label: 'WASPADA',
+    desc: 'Gelombang mulai tinggi dan angin cukup kencang. Hanya nelayan berpengalaman dengan perahu besar yang boleh melaut — tetap waspada.',
+    tips: [
+      { color: '#c47a00', text: 'Nelayan pemula dan perahu kecil sebaiknya tidak melaut hari ini.' },
+      { color: '#c47a00', text: 'Kalau sudah di laut, segera kembali ke darat sebelum siang.' },
+      { color: '#c47a00', text: 'Pakai pelampung dan pastikan HP terisi penuh.' },
+      { color: '#c47a00', text: 'Beritahu keluarga rencana melaut dan jam pulang.' },
+    ]
+  };
+  return {
+    level: 'aman',
+    emoji: '⛵',
+    label: 'AMAN MELAUT',
+    desc: 'Kondisi laut baik. Gelombang rendah dan angin tenang. Waktu yang bagus untuk melaut — tetap pantau cuaca siang hari.',
+    tips: [
+      { color: '#1a7a4a', text: 'Berangkat lebih awal (sebelum jam 10) sebelum angin siang mulai kencang.' },
+      { color: '#1a7a4a', text: 'Pantau terus grup WA cuaca — kondisi bisa berubah sore hari.' },
+      { color: '#1a7a4a', text: 'Bawa pelampung dan pastikan HP terisi penuh sebelum ke laut.' },
+      { color: '#1a7a4a', text: 'Kabari keluarga jam perkiraan pulang sebelum berangkat.' },
+    ]
+  };
+}
+
+function drawWave(heights, level) {
+  if (waveAnimId) cancelAnimationFrame(waveAnimId);
+  const canvas = document.getElementById('waveCanvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.offsetWidth;
+  const H = 70;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  ctx.scale(dpr, dpr);
+
+  const colors = { aman:'#2da860', waspada:'#f0a500', bahaya:'#e74c3c' };
+  const fills  = { aman:'rgba(45,168,96,0.12)', waspada:'rgba(240,165,0,0.12)', bahaya:'rgba(231,76,60,0.12)' };
+  const color = colors[level] || '#2da860';
+  const fill  = fills[level]  || fills.aman;
+
+  const maxH = Math.max(...heights, 0.1);
+  let offset = 0;
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    ctx.beginPath();
+    ctx.moveTo(0, H);
+    for (let x = 0; x <= W; x++) {
+      const t = x / W;
+      const idx = t * (heights.length - 1);
+      const i = Math.floor(idx);
+      const frac = idx - i;
+      const h1 = heights[Math.min(i, heights.length-1)] || 0;
+      const h2 = heights[Math.min(i+1, heights.length-1)] || 0;
+      const h = h1 + (h2 - h1) * frac;
+      const wave = Math.sin((x / W * 5 + offset) * Math.PI * 2) * 5;
+      const y = H - (h / (maxH * 1.3)) * (H - 10) + wave;
+      x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.lineTo(W, H);
+    ctx.closePath();
+    ctx.fillStyle = fill;
+    ctx.fill();
+
+    ctx.beginPath();
+    for (let x = 0; x <= W; x++) {
+      const t = x / W;
+      const idx = t * (heights.length - 1);
+      const i = Math.floor(idx);
+      const frac = idx - i;
+      const h1 = heights[Math.min(i, heights.length-1)] || 0;
+      const h2 = heights[Math.min(i+1, heights.length-1)] || 0;
+      const h = h1 + (h2 - h1) * frac;
+      const wave = Math.sin((x / W * 5 + offset) * Math.PI * 2) * 5;
+      const y = H - (h / (maxH * 1.3)) * (H - 10) + wave;
+      x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    offset += 0.007;
+    waveAnimId = requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+loadData();
+</script>
+</body>
+</html>
